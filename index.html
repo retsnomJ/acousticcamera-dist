@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#145248">
+  <meta name="description" content="AcousticCamera 声学成像移动应用下载">
+  <title>AcousticCamera · 应用下载</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --brand: #1F6F63;
+      --brand-dark: #145248;
+      --brand-light: #E8F5F2;
+      --bg: #FAFBFC;
+      --card-bg: #FFFFFF;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-tertiary: #94A3B8;
+      --border: #E2E8F0;
+      --success: #16A34A;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+      --shadow-lg: 0 12px 32px rgba(31, 111, 99, 0.18);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --transition: 240ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .lang-switcher {
+      position: absolute;
+      top: max(20px, env(safe-area-inset-top));
+      right: 20px;
+      display: inline-flex;
+      gap: 2px;
+      padding: 3px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      box-shadow: var(--shadow-sm);
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 10;
+    }
+
+    .lang-switcher button {
+      padding: 5px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 999px;
+      transition: var(--transition);
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      letter-spacing: 0.3px;
+    }
+
+    .lang-switcher button.active {
+      background: var(--brand);
+      color: white;
+      box-shadow: 0 1px 3px rgba(31, 111, 99, 0.3);
+    }
+
+    .lang-switcher button:not(.active):hover {
+      color: var(--brand);
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      background-image:
+        radial-gradient(at 20% 0%, rgba(31, 111, 99, 0.07) 0px, transparent 50%),
+        radial-gradient(at 80% 100%, rgba(31, 111, 99, 0.05) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      font-feature-settings: "tnum";
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: max(20px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 16px 0 4px;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      font-weight: 500;
+    }
+
+    .brand-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--brand);
+      border-radius: 50%;
+      box-shadow: 0 0 0 4px rgba(31, 111, 99, 0.15);
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #0F172A 0%, #145248 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    .detection {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-align: center;
+      animation: fadeInUp 0.6s ease 0.1s both;
+      min-height: 46px;
+    }
+
+    .detection.loading { color: var(--text-tertiary); }
+
+    .detection .check {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--brand);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+
+    .detection.done .check {
+      border: none;
+      background: var(--success);
+      animation: none;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .detection.done .check::after {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 1px;
+      width: 4px;
+      height: 8px;
+      border-right: 2px solid white;
+      border-bottom: 2px solid white;
+      transform: rotate(45deg);
+    }
+
+    .detection .device {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .card {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: inherit;
+      transition: var(--transition);
+      opacity: 0.6;
+      cursor: pointer;
+      overflow: hidden;
+      animation: fadeInUp 0.5s ease both;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.15s; }
+    .card:nth-child(2) { animation-delay: 0.25s; }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 0%, rgba(31, 111, 99, 0.04) 100%);
+      opacity: 0;
+      transition: var(--transition);
+      pointer-events: none;
+    }
+
+    .card:hover { opacity: 0.85; }
+
+    .card:active { transform: scale(0.98); }
+
+    .card.recommended {
+      opacity: 1;
+      border-color: var(--brand);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card.recommended::before { opacity: 1; }
+
+    .card.recommended:hover {
+      transform: translateY(-1px);
+      border-color: var(--brand-dark);
+      opacity: 1;
+    }
+
+    .badge {
+      position: absolute;
+      top: 0;
+      right: 16px;
+      transform: translateY(-50%);
+      padding: 3px 10px;
+      background: var(--brand);
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 8px rgba(31, 111, 99, 0.35);
+      z-index: 1;
+    }
+
+    .icon-wrap {
+      flex-shrink: 0;
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--brand-light);
+      border-radius: 14px;
+      transition: var(--transition);
+    }
+
+    .card.recommended .icon-wrap { background: var(--brand); }
+
+    .icon-wrap svg {
+      width: 28px;
+      height: 28px;
+      color: var(--brand);
+      transition: var(--transition);
+    }
+
+    .card.recommended .icon-wrap svg { color: white; }
+
+    .info { flex: 1; min-width: 0; }
+
+    .info h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+
+    .info p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .arrow {
+      flex-shrink: 0;
+      color: var(--text-tertiary);
+      transition: var(--transition);
+    }
+
+    .card.recommended .arrow { color: var(--brand); }
+
+    .arrow svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      padding-top: 4px;
+      line-height: 1.7;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-height: 600px) and (orientation: landscape) {
+      .container { min-height: auto; padding-top: 16px; padding-bottom: 16px; }
+      header { padding: 8px 0; }
+      h1 { font-size: 26px; }
+      .subtitle { font-size: 14px; }
+      .cards { gap: 10px; }
+      .card { padding: 14px 16px; }
+      .icon-wrap { width: 48px; height: 48px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="lang-switcher" role="group" aria-label="Language">
+    <button type="button" data-lang="zh">中文</button>
+    <button type="button" data-lang="en">EN</button>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span>HUAPU INSTRUMENTS</span>
+      </div>
+      <h1>AcousticCamera</h1>
+      <p class="subtitle" data-i18n="subtitle">956D 声学成像 · 移动应用下载</p>
+    </header>
+
+    <div class="detection loading" id="detection" role="status" aria-live="polite">
+      <span class="check"></span>
+      <span class="text" data-i18n="detecting">正在检测设备环境...</span>
+    </div>
+
+    <nav class="cards" aria-label="Download channels">
+      <a class="card" data-platform="android-cn"
+         href="https://www.pgyer.com/acousticcamera"
+         target="_blank" rel="noopener">
+        <div class="icon-wrap" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </div>
+        <div class="info">
+          <h2 data-i18n="android_cn_title">Android（中国大陆）</h2>
+          <p data-i18n="android_cn_desc">蒲公英分发 · 国内高速直下</p>
+        </div>
+        <div class="arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+      </a>
+
+      <a class="card" data-platform="android-intl"
+         href="https://github.com/retsnomJ/acousticcamera-dist/releases/latest/download/app-release.apk"
+         target="_blank" rel="noopener">
+        <div class="icon-wrap" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </div>
+        <div class="info">
+          <h2 data-i18n="android_intl_title">Android（海外）</h2>
+          <p data-i18n="android_intl_desc">GitHub Releases · APK 直接下载</p>
+        </div>
+        <div class="arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+      </a>
+    </nav>
+
+    <div class="footer-note">
+      <span data-i18n="footer_hint">若自动推荐有误，请手动点击对应卡片选择 · 首次安装需允许"安装未知来源应用"</span><br>
+      <span data-i18n="footer_copy">© 2026 华普仪器 · 保留所有权利</span>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const I18N = {
+        zh: {
+          subtitle: '956D 声学成像 · 移动应用下载',
+          detecting: '正在检测设备环境...',
+          android_cn_title: 'Android（中国大陆）',
+          android_cn_desc: '蒲公英分发 · 国内高速直下',
+          android_intl_title: 'Android（海外）',
+          android_intl_desc: 'GitHub Releases · APK 直接下载',
+          footer_hint: '若自动推荐有误，请手动点击对应卡片选择 · 首次安装需允许"安装未知来源应用"',
+          footer_copy: '© 2026 华普仪器 · 保留所有权利',
+          device_android: 'Android 设备',
+          device_desktop: '桌面设备',
+          region_mainland: '中国大陆',
+          region_overseas: '海外地区',
+          recommended_text: '已为你推荐下载渠道',
+          recommend_badge: '推荐',
+          unknown_device: '本软件仅支持 Android 设备，请选择下方渠道下载'
+        },
+        en: {
+          subtitle: '956D Acoustic Imaging · App Download',
+          detecting: 'Detecting your device...',
+          android_cn_title: 'Android (Mainland China)',
+          android_cn_desc: 'Pgyer distribution · Fast in mainland',
+          android_intl_title: 'Android (International)',
+          android_intl_desc: 'GitHub Releases · Direct APK download',
+          footer_hint: "If the recommendation is incorrect, please tap the matching card. Allow 'install unknown apps' on first install.",
+          footer_copy: '© 2026 Huapu Instruments · All Rights Reserved',
+          device_android: 'Android device',
+          device_desktop: 'Desktop device',
+          region_mainland: 'Mainland China',
+          region_overseas: 'Outside Mainland China',
+          recommended_text: "We've recommended the best channel for you",
+          recommend_badge: 'Recommended',
+          unknown_device: 'This app supports Android devices only. Please choose a channel below.'
+        }
+      };
+
+      function detectInitialLang() {
+        const saved = localStorage.getItem('lang');
+        if (saved && I18N[saved]) return saved;
+        const browserLang = (navigator.language || navigator.userLanguage || 'zh').toLowerCase();
+        return browserLang.startsWith('zh') ? 'zh' : 'en';
+      }
+
+      let currentLang = detectInitialLang();
+
+      function applyI18n(lang) {
+        currentLang = lang;
+        localStorage.setItem('lang', lang);
+        const dict = I18N[lang];
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          const key = el.getAttribute('data-i18n');
+          if (dict[key] !== undefined) {
+            el.innerHTML = dict[key];
+          }
+        });
+
+        document.querySelectorAll('.lang-switcher button').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.lang === lang);
+        });
+
+        document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+
+        renderDetection();
+      }
+
+      const MAINLAND_TIMEZONES = new Set([
+        'Asia/Shanghai', 'Asia/Urumqi', 'Asia/Chongqing',
+        'Asia/Chungking', 'Asia/Harbin', 'Asia/Kashgar', 'PRC'
+      ]);
+
+      const ua = navigator.userAgent || '';
+      const isAndroid = /Android/i.test(ua);
+
+      let timeZone = '';
+      try {
+        timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      } catch (e) {
+        timeZone = '';
+      }
+      const isMainlandChina = MAINLAND_TIMEZONES.has(timeZone);
+
+      // 本应用仅有 Android 版：Android 设备按时区推荐渠道，
+      // 其他设备（iOS/桌面）不推荐，仅提示"仅支持 Android"
+      let recommendedPlatform = null;
+      if (isAndroid) {
+        recommendedPlatform = isMainlandChina ? 'android-cn' : 'android-intl';
+      }
+
+      let detectionDone = false;
+
+      function renderDetection() {
+        if (!detectionDone) return;
+        const detection = document.getElementById('detection');
+        const textEl = detection.querySelector('.text');
+        const dict = I18N[currentLang];
+
+        if (recommendedPlatform) {
+          const deviceText = dict.device_android;
+          const regionText = timeZone
+            ? (isMainlandChina ? dict.region_mainland : dict.region_overseas)
+            : '';
+
+          const detectedLabel = currentLang === 'zh' ? '检测到' : 'Detected:';
+          const parts = [];
+          if (deviceText) {
+            parts.push(`${detectedLabel} <span class="device">${deviceText}</span>`);
+          }
+          if (regionText) parts.push(regionText);
+
+          const connector = currentLang === 'zh' ? '，' : '. ';
+          const prefix = parts.length ? parts.join(' · ') + connector : '';
+          textEl.innerHTML = prefix + dict.recommended_text;
+
+          const existingBadge = document.querySelector('.card.recommended .badge');
+          if (existingBadge) existingBadge.textContent = dict.recommend_badge;
+        } else {
+          textEl.innerHTML = dict.unknown_device;
+        }
+      }
+
+      function updateUI() {
+        detectionDone = true;
+        const detection = document.getElementById('detection');
+        detection.classList.remove('loading');
+        detection.classList.add('done');
+
+        if (recommendedPlatform) {
+          const card = document.querySelector(
+            `.card[data-platform="${recommendedPlatform}"]`
+          );
+          if (card && !card.classList.contains('recommended')) {
+            card.classList.add('recommended');
+            const badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.textContent = I18N[currentLang].recommend_badge;
+            card.appendChild(badge);
+          }
+        }
+        renderDetection();
+      }
+
+      document.querySelectorAll('.lang-switcher button').forEach(btn => {
+        btn.addEventListener('click', () => applyI18n(btn.dataset.lang));
+      });
+
+      applyI18n(currentLang);
+      setTimeout(updateUI, 500);
+    })();
+  </script>
+</body>
+</html>
